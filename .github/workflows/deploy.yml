@@ -1,4 +1,4 @@
-name: Auto Deploy WebApp
+name: .NET EC2 Auto Deploy
 
 on:
   push:
@@ -6,42 +6,58 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
+      
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup .NET 8
+      
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
 
-      - name: Publish Project
+      
+      - name: Publish App
         run: dotnet publish -c Release -o publish
 
-      - name: Clean EC2 HTML folder
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            rm -rf /var/www/html/*
+      
+      - name: Verify Publish Output
+        run: ls -R publish
 
-      - name: Copy wwwroot to EC2
+      
+      - name: Copy Files to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
           source: "publish/wwwroot/*"
-          target: "/var/www/html"
+          target: "/home/ubuntu/deploy-temp"
 
-      - name: Restart Nginx
+      
+      - name: Deploy to Nginx
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: sudo systemctl restart nginx
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+           
+            sudo rm -rf /var/www/html/*
+
+            
+            sudo mv /home/ubuntu/deploy-temp/* /var/www/html/
+
+            
+            sudo rm -rf /home/ubuntu/deploy-temp
+
+           
+            sudo chown -R www-data:www-data /var/www/html
+            sudo chmod -R 755 /var/www/html
+
+            
+            sudo systemctl restart nginx
