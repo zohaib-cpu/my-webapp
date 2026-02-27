@@ -25,3 +25,8 @@ C:\Users\This PC\Desktop\MyWebHtmlApp\obj\Release\net8.0\refint\MyWebHtmlApp.dll
 C:\Users\This PC\Desktop\MyWebHtmlApp\obj\Release\net8.0\MyWebHtmlApp.pdb
 C:\Users\This PC\Desktop\MyWebHtmlApp\obj\Release\net8.0\MyWebHtmlApp.genruntimeconfig.cache
 C:\Users\This PC\Desktop\MyWebHtmlApp\obj\Release\net8.0\ref\MyWebHtmlApp.dll
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\web.config
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\appsettings.Development.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\appsettings.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\MyWebHtmlApp.deps.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\MyWebHtmlApp.runtimeconfig.json

@@ -1,6 +1,11 @@
 C:\Users\This PC\Desktop\MyWebHtmlApp\publish\MyWebHtmlApp.exe
+C:\Users\This PC\Desktop\MyWebHtmlApp\publish\publish\web.config
 C:\Users\This PC\Desktop\MyWebHtmlApp\publish\appsettings.Development.json
 C:\Users\This PC\Desktop\MyWebHtmlApp\publish\appsettings.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\publish\publish\appsettings.Development.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\publish\publish\appsettings.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\publish\publish\MyWebHtmlApp.deps.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\publish\publish\MyWebHtmlApp.runtimeconfig.json
 C:\Users\This PC\Desktop\MyWebHtmlApp\publish\MyWebHtmlApp.dll
 C:\Users\This PC\Desktop\MyWebHtmlApp\publish\MyWebHtmlApp.deps.json
 C:\Users\This PC\Desktop\MyWebHtmlApp\publish\MyWebHtmlApp.runtimeconfig.json
