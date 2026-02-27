@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      
+     
       - name: Checkout Code
         uses: actions/checkout@v3
 
@@ -20,13 +20,19 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-     
+      
       - name: Publish App
         run: dotnet publish -c Release -o publish
 
-     
+    
       - name: Verify Publish Output
         run: ls -R publish
+
+      
+      - name: Flatten wwwroot
+        run: |
+          mkdir -p deploy-temp
+          cp -r publish/wwwroot/* deploy-temp/
 
       
       - name: Copy Files to EC2
@@ -36,7 +42,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "deploy-temp/*"
-        target: "/home/ubuntu/deploy-temp"
+          target: "/home/ubuntu/deploy-temp"
 
      
       - name: Deploy to Nginx
@@ -46,16 +52,16 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            
+           
             sudo rm -rf /var/www/html/*
 
-           
+            
             sudo mv /home/ubuntu/deploy-temp/* /var/www/html/
 
             
             sudo rm -rf /home/ubuntu/deploy-temp
 
-            
+           
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
 
