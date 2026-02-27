@@ -35,8 +35,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
-          source: "publish/wwwroot/."       
-          target: "/home/ubuntu/deploy-temp"
+          source: "deploy-temp/*"
+        target: "/home/ubuntu/deploy-temp"
 
      
       - name: Deploy to Nginx
