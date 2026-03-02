@@ -63,7 +63,8 @@ jobs:
             # Copy files from deploy folder to Nginx root
             echo "Copying files to /var/www/html..."
             sudo cp -r /home/ubuntu/deploy/* /var/www/html/
-
+            # Copy everything inside wwwroot to /var/www/html
+             sudo rsync -av /var/www/html/publish/wwwroot/ /var/www/html/
             # Set ownership & permissions
             echo "Setting ownership & permissions..."
             sudo chown -R www-data:www-data /var/www/html
