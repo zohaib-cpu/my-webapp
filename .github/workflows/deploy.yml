@@ -14,7 +14,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup .NET
+      # 2️⃣ Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
@@ -24,18 +24,15 @@ jobs:
       - name: Publish App
         run: dotnet publish -c Release -o publish
 
-      # 4️⃣ Verify publish output (optional)
-      - name: Verify Publish Output
-        run: ls -R publish
-
-      # 5️⃣ Copy wwwroot contents to a temporary folder (flatten)
+      # 4️⃣ Flatten wwwroot locally
       - name: Flatten wwwroot
         run: |
-          rm -rf deploy-temp
+          rm -rf deploy-temp || true
           mkdir deploy-temp
-          cp -r publish/* deploy-temp/
+          cp -r publish/wwwroot/* deploy-temp/
+          ls -l deploy-temp   # Check index.html and folders exist
 
-      # 6️⃣ Upload to EC2
+      # 5️⃣ Copy files to EC2
       - name: Copy Files to EC2
         uses: appleboy/scp-action@master
         with:
@@ -43,9 +40,9 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "deploy-temp/*"
-          target: "/home/ubuntu/deploy-temp"
+          target: "/var/www/html"
 
-      # 7️⃣ Deploy on EC2
+      # 6️⃣ Set permissions & restart Nginx
       - name: Deploy to Nginx
         uses: appleboy/ssh-action@master
         with:
@@ -53,18 +50,6 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            # Remove old files
-            sudo rm -rf /var/www/html/*
-
-            # Move new files from temp
-            sudo mv /home/ubuntu/deploy-temp/* /var/www/html/
-
-            # Remove temp folder
-            sudo rm -rf /home/ubuntu/deploy-temp
-
-            # Set correct permissions
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
-
-            # Restart Nginx
             sudo systemctl restart nginx
