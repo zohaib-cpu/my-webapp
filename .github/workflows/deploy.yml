@@ -39,7 +39,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: "publish/*"
+          source: "publish/wwwroot/*"
           target: "/home/ubuntu/deploy/"
 
       # 7️⃣ Deploy on EC2 (move files, set permissions, reload Nginx)
@@ -60,12 +60,9 @@ jobs:
             echo "Cleaning old HTML..."
             sudo rm -rf /var/www/html/*
 
-            # **Copy all files from publish/wwwroot to HTML root**
-            echo "Copying files from publish/wwwroot to html root..."
-            sudo cp -r /var/www/html/publish/wwwroot/* /var/www/html/
-
-            # Optional: remove old publish folder
-            sudo rm -rf /var/www/html/publish
+            # Copy files from deploy folder to Nginx root
+            echo "Copying files from deploy folder..."
+            sudo cp -r /home/ubuntu/deploy/* /var/www/html/
 
             # Set ownership & permissions
             echo "Setting ownership & permissions..."
@@ -75,5 +72,9 @@ jobs:
             # Reload Nginx
             echo "Reloading Nginx..."
             sudo systemctl reload nginx
+
+            # Optional: clean deploy folder
+            echo "Cleaning deploy folder..."
+            sudo rm -rf /home/ubuntu/deploy/*
 
             echo "✅ Deployment finished!"
