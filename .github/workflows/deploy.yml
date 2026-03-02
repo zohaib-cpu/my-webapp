@@ -44,7 +44,7 @@ jobs:
           sudo rm -rf /var/www/html/*
 
           # Copy published wwwroot to Nginx root
-          sudo cp -r /home/runner/work/my-webapp/my-webapp/publish/wwwroot/* /var/www/html/
+             sudo cp -r /home/runner/work/my-webapp/my-webapp/publish/* /var/www/html/
 
           # Set ownership & permissions
           sudo chown -R www-data:www-data /var/www/html
