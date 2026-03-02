@@ -27,11 +27,11 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release
 
-    # 5️⃣ Publish the app to 'publish' folder
+    # 5️⃣ Publish the app
     - name: Publish
       run: dotnet publish -c Release -o publish
 
-    # 6️⃣ Deploy wwwroot to EC2 & fix permissions
+    # 6️⃣ Deploy to EC2
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.6
       with:
@@ -42,16 +42,13 @@ jobs:
         script: |
           # Clean old html
           sudo rm -rf /var/www/html/*
-          
+
           # Copy published wwwroot to Nginx root
-          sudo cp -r /home/ubuntu/github-runner/publish/wwwroot/* /var/www/html/
-          
-          # Set proper ownership & permissions
+          sudo cp -r /home/runner/work/my-webapp/my-webapp/publish/wwwroot/* /var/www/html/
+
+          # Set ownership & permissions
           sudo chown -R www-data:www-data /var/www/html
           sudo chmod -R 755 /var/www/html
-          
-          # Remove temp folder if exists
-          sudo rm -rf /var/www/html/deploy-temp
-          
-          # Reload Nginx (so changes reflect immediately)
+
+          # Reload Nginx
           sudo systemctl reload nginx
