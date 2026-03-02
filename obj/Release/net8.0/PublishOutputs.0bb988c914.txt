@@ -1,0 +1,7 @@
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\MyWebHtmlApp.exe
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\appsettings.Development.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\appsettings.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\MyWebHtmlApp.dll
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\MyWebHtmlApp.deps.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\MyWebHtmlApp.runtimeconfig.json
+C:\Users\This PC\Desktop\MyWebHtmlApp\bin\Release\net8.0\publish\MyWebHtmlApp.pdb
