@@ -31,8 +31,19 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o publish
 
-      # 6️⃣ Deploy wwwroot to EC2
-      - name: Deploy to EC2
+      # 6️⃣ Upload publish folder to EC2
+      - name: Upload publish folder to EC2
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "publish/wwwroot/*"
+          target: "/home/ubuntu/deploy/"
+
+      # 7️⃣ Deploy on EC2 (move files, set permissions, reload Nginx)
+      - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -43,8 +54,8 @@ jobs:
             echo "Cleaning old HTML..."
             sudo rm -rf /var/www/html/*
 
-            echo "Copying wwwroot files..."
-            sudo cp -r /home/ubuntu/github-runner/work/my-webapp/my-webapp/publish/wwwroot/* /var/www/html/
+            echo "Copying files from deploy folder..."
+            sudo cp -r /home/ubuntu/deploy/* /var/www/html/
 
             echo "Setting ownership & permissions..."
             sudo chown -R www-data:www-data /var/www/html
