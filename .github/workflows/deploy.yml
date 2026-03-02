@@ -9,46 +9,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-   
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      # 1️⃣ Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-  
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
+      # 2️⃣ Setup .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
 
-    
-    - name: Restore dependencies
-      run: dotnet restore
+      # 3️⃣ Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
 
-   
-    - name: Build
-      run: dotnet build --configuration Release
+      # 4️⃣ Build the app
+      - name: Build
+        run: dotnet build --configuration Release
 
-    
-    - name: Publish
-      run: dotnet publish -c Release -o publish
+      # 5️⃣ Publish the app to 'publish' folder
+      - name: Publish
+        run: dotnet publish -c Release -o publish
 
-   
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        script: |
-          # Clean old html
-          sudo rm -rf /var/www/html/*
+      # 6️⃣ Debug step to confirm publish folder path
+      - name: Debug publish folder
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "List current folder:"
+          ls -l
+          echo "List publish folder:"
+          ls -l publish || echo "Publish folder not found"
 
-          # Copy published wwwroot to Nginx root
-             sudo cp -r /home/runner/work/my-webapp/my-webapp/publish/* /var/www/html/
+      # 7️⃣ Deploy publish folder to EC2
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            echo "Cleaning old HTML..."
+            sudo rm -rf /var/www/html/*
 
-          # Set ownership & permissions
-          sudo chown -R www-data:www-data /var/www/html
-          sudo chmod -R 755 /var/www/html
+            # Adjust the path if debug shows different location
+            echo "Copying published files..."
+            sudo cp -r /home/ubuntu/github-runner/work/my-webapp/my-webapp/publish/* /var/www/html/
 
-          # Reload Nginx
-          sudo systemctl reload nginx
+            echo "Setting ownership & permissions..."
+            sudo chown -R www-data:www-data /var/www/html
+            sudo chmod -R 755 /var/www/html
+
+            echo "Reloading Nginx..."
+            sudo systemctl reload nginx
