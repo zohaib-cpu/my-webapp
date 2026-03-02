@@ -33,7 +33,7 @@ jobs:
         run: |
           rm -rf deploy-temp
           mkdir deploy-temp
-          cp -r publish/wwwroot/* deploy-temp/
+          cp -r publish/* deploy-temp/
 
       # 6️⃣ Upload to EC2
       - name: Copy Files to EC2
