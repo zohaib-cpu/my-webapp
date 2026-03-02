@@ -1,8 +1,9 @@
-name: .NET WebApp Auto Deploy to EC2
+name: .NET WebApp CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
@@ -10,69 +11,59 @@ jobs:
 
     steps:
       # 1️⃣ Checkout code
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       # 2️⃣ Setup .NET SDK
-      - name: Setup .NET
+      - name: Setup .NET 8 SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
 
-      # 3️⃣ Restore dependencies
-      - name: Restore dependencies
-        run: dotnet restore
+      # 3️⃣ Restore & Build
+      - name: Restore & Build
+        run: |
+          dotnet restore
+          dotnet build --configuration Release
 
-      # 4️⃣ Build the app
-      - name: Build
-        run: dotnet build --configuration Release
-
-      # 5️⃣ Publish the app to 'publish' folder
+      # 4️⃣ Publish
       - name: Publish
         run: dotnet publish -c Release -o publish
 
-      # 6️⃣ Upload publish folder to EC2
-      - name: Upload publish folder to EC2
-        uses: appleboy/scp-action@v0.1.3
+      # 5️⃣ Copy files to EC2 deploy folder
+      - name: SCP to EC2
+        uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
           source: "publish/wwwroot/*"
-          target: "/var/www/html"
+          target: "/home/ubuntu/deploy"
 
-      # 7️⃣ Deploy on EC2 (move files, set permissions, reload Nginx)
+      # 6️⃣ Run deploy script on EC2
       - name: Deploy on EC2
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
           script: |
             echo "✅ Starting deployment..."
 
-           
             # Clean old HTML
-            echo "Cleaning old HTML..."
             sudo rm -rf /var/www/html/*
 
-           
-            
-            sudo cp -r /var/www/html/publish/wwwroot/* /var/www/html/
+            # Copy published files to Nginx root
+            sudo cp -r /home/ubuntu/deploy/* /var/www/html/
 
             # Set ownership & permissions
-            echo "Setting ownership & permissions..."
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
 
             # Reload Nginx
-            echo "Reloading Nginx..."
             sudo systemctl reload nginx
 
-            # Optional: clean deploy folder
-            echo "Cleaning deploy folder..."
-            sudo rm -rf /home/ubuntu/deploy/*
+            # Clean deploy folder
+            sudo rm -rf /home/ubuntu/deploy
 
             echo "✅ Deployment finished!"
