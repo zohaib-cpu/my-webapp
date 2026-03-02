@@ -10,28 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
 
-      # 3️⃣ Publish .NET app
       - name: Publish App
         run: dotnet publish -c Release -o publish
 
-      # 4️⃣ Flatten publish folder (remove extra inner folder)
+      # Flatten publish and wwwroot contents
       - name: Flatten Publish Folder
         run: |
           rm -rf deploy-temp
           mkdir deploy-temp
+          # Copy dll, exe, pdb, web.config, etc.
           cp -r publish/* deploy-temp/
+          # Copy wwwroot contents directly (flatten)
+          cp -r publish/wwwroot/* deploy-temp/
 
-      # 5️⃣ Copy files to EC2
       - name: Copy Files to EC2
         uses: appleboy/scp-action@master
         with:
@@ -41,7 +40,6 @@ jobs:
           source: "deploy-temp/*"
           target: "/home/ubuntu/deploy-temp"
 
-      # 6️⃣ Deploy to EC2 (move to /var/www/html, set permissions, restart services)
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -49,19 +47,10 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            # Clear old files
             sudo rm -rf /var/www/html/*
-
-            # Move new files from temp folder
             sudo mv /home/ubuntu/deploy-temp/* /var/www/html/
-
-            # Set correct ownership and permissions
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
-
-            # Reload systemd and restart service
             sudo systemctl daemon-reload
             sudo systemctl restart mywebapp.service
-
-            # Restart Nginx
             sudo systemctl restart nginx
