@@ -17,54 +17,65 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-     
       - name: Restore dependencies
         run: dotnet restore
 
-     
       - name: Build
         run: dotnet build --configuration Release
 
-     
       - name: Publish
         run: dotnet publish -c Release -o publish
 
-      
-      - name: Upload frontend to EC2
+      - name: Upload full publish to EC2
         uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: "publish/wwwroot/*"
-          target: "/home/ubuntu/deploy/"
+          source: "publish/*"
+          target: "/home/ubuntu/myapp/"
+
+      -  name: Deploy backend & frontend on EC2
+         uses: appleboy/ssh-action@v0.1.6
+         with:
+         host: ${{ secrets.EC2_HOST }}
+         username: ${{ secrets.EC2_USER }}
+         key: ${{ secrets.EC2_SSH_KEY }}
+         port: 22
+    script: |
+      mkdir -p /home/ubuntu/myapp
 
      
-      - name: Deploy on EC2
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
-            
-            mkdir -p /home/ubuntu/deploy
-           
-            sudo rm -rf /var/www/html/*
+      sudo pkill -f MyWebHtmlApp.dll || true
 
-            sudo cp -r /home/ubuntu/deploy/* /var/www/html/
-            
-            sudo rsync -av /var/www/html/publish/wwwroot/ /var/www/html/
-                        
-            sudo chown -R www-data:www-data /var/www/html
-            sudo chmod -R 755 /var/www/html
-           
-            ls -l /var/www/html/index.html
-            
-            sudo systemctl reload nginx
+     
+      sudo tee /etc/systemd/system/mywebapp.service > /dev/null << 'EOL'
+         [Unit]
+         Description=My .NET WebApp
+         After=network.target
 
-            sudo rm -rf /home/ubuntu/deploy/*
+       [Service]
+       WorkingDirectory=/home/ubuntu/myapp
+       ExecStart=/usr/bin/dotnet /home/ubuntu/myapp/MyWebHtmlApp.dll
+       Restart=always
+       RestartSec=10
+       SyslogIdentifier=mywebapp
+       User=ubuntu
+       Environment=ASPNETCORE_ENVIRONMENT=Production
 
-            
+      [Install]
+      WantedBy=multi-user.target
+      EOL
+
+      
+      sudo systemctl daemon-reload
+      sudo systemctl enable mywebapp
+      sudo systemctl restart mywebapp
+
+     
+      sudo rm -rf /var/www/html/*
+      sudo cp -r /home/ubuntu/myapp/wwwroot/* /var/www/html/
+      sudo chown -R www-data:www-data /var/www/html
+      sudo chmod -R 755 /var/www/html
+      sudo systemctl reload nginx
