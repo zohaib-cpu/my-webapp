@@ -1,7 +1,10 @@
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
-app.UseDefaultFiles();   // index.html auto load
-app.UseStaticFiles();    // wwwroot serve karega
+app.UseStaticFiles();
+app.MapRazorPages();
 
 app.Run();
