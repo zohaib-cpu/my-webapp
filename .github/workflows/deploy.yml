@@ -62,18 +62,23 @@ jobs:
             SyslogIdentifier=mywebapp
             User=ubuntu
             Environment=ASPNETCORE_ENVIRONMENT=Production
+            Environment=DOTNET_CLI_HOME=/home/ubuntu
 
             [Install]
             WantedBy=multi-user.target
             EOF
+
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/myapp
+            sudo chmod -R 755 /home/ubuntu/myapp
+            sudo mkdir -p /home/ubuntu/.dotnet
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/.dotnet
 
             sudo systemctl daemon-reload
             sudo systemctl enable mywebapp
             sudo systemctl restart mywebapp
 
             sudo rm -rf /var/www/html/*
-            sudo cp -r /home/ubuntu/myapp/wwwroot/* /var/www/html/
+            sudo cp -r /home/ubuntu/myapp/publish/wwwroot/* /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
             sudo systemctl reload nginx
-            
