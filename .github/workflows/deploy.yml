@@ -47,12 +47,17 @@ jobs:
           script: |
             mkdir -p /home/ubuntu/myapp/publish
             mkdir -p /home/ubuntu/.dotnet
+            mkdir -p /home/ubuntu/tmp
 
             sudo pkill -f MyWebHtmlApp.dll || true
 
             sudo chown -R ubuntu:ubuntu /home/ubuntu/myapp
             sudo chown -R ubuntu:ubuntu /home/ubuntu/.dotnet
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/tmp
+
             sudo chmod -R 755 /home/ubuntu/myapp
+            sudo chmod -R 755 /home/ubuntu/.dotnet
+            sudo chmod -R 755 /home/ubuntu/tmp
 
             sudo tee /etc/systemd/system/mywebapp.service > /dev/null << 'EOF'
             [Unit]
@@ -68,6 +73,8 @@ jobs:
             User=ubuntu
             Environment=ASPNETCORE_ENVIRONMENT=Production
             Environment=DOTNET_CLI_HOME=/home/ubuntu
+            Environment=TMPDIR=/home/ubuntu/tmp
+
 
             [Install]
             WantedBy=multi-user.target
