@@ -80,5 +80,6 @@ jobs:
             sudo rm -rf /var/www/html/*
             sudo cp -r /home/ubuntu/myapp/publish/wwwroot/* /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
+            ls -l /home/ubuntu/myapp/publish/MyWebHtmlApp.dll
             sudo chmod -R 755 /var/www/html
             sudo systemctl reload nginx
