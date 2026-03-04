@@ -48,22 +48,18 @@ jobs:
           timeout: 15m  
           script: |
             #!/bin/bash
-            set -e  # exit immediately if any command fails
+            set -e
 
             
-            mkdir -p /home/ubuntu/myapp/publish
-            mkdir -p /home/ubuntu/.dotnet
-            mkdir -p /home/ubuntu/tmp
-
-            
+            cat << 'DEPLOY_SCRIPT' > /home/ubuntu/deploy.sh
+            #!/bin/bash
+            set -e
+            mkdir -p /home/ubuntu/myapp/publish /home/ubuntu/.dotnet /home/ubuntu/tmp
             sudo pkill -f MyWebHtmlApp.dll || true
-
-            
-            sudo chown -R ubuntu:ubuntu /home/ubuntu/myapp /home/ubuntu/.dotnet /home/ubuntu/tmp
+            sudo chown -R ubuntu:ubuntu /home/ubuntu
             sudo chmod 755 /home/ubuntu
             sudo chmod -R 755 /home/ubuntu/myapp /home/ubuntu/.dotnet /home/ubuntu/tmp
 
-            
             sudo tee /etc/systemd/system/mywebapp.service > /dev/null << 'EOF'
             [Unit]
             Description=My .NET WebApp
@@ -84,14 +80,21 @@ jobs:
             WantedBy=multi-user.target
             EOF
 
-           
             sudo systemctl daemon-reload
             sudo systemctl enable mywebapp
             sudo systemctl restart mywebapp
 
-           
             sudo rm -rf /var/www/html/*
             sudo rsync -av /home/ubuntu/myapp/publish/wwwroot/ /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
             sudo chmod -R 755 /var/www/html
             sudo systemctl reload nginx
+
+            
+            DEPLOY_SCRIPT
+
+          
+            chmod +x /home/ubuntu/deploy.sh
+
+            
+            nohup /home/ubuntu/deploy.sh > /home/ubuntu/deploy.log 2>&1 &
