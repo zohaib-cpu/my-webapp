@@ -45,20 +45,22 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            
             mkdir -p /home/ubuntu/myapp/publish
             mkdir -p /home/ubuntu/.dotnet
             mkdir -p /home/ubuntu/tmp
 
             sudo pkill -f MyWebHtmlApp.dll || true
 
+           
             sudo chown -R ubuntu:ubuntu /home/ubuntu/myapp
             sudo chown -R ubuntu:ubuntu /home/ubuntu/.dotnet
             sudo chown -R ubuntu:ubuntu /home/ubuntu/tmp
-
             sudo chmod -R 755 /home/ubuntu/myapp
             sudo chmod -R 755 /home/ubuntu/.dotnet
             sudo chmod -R 755 /home/ubuntu/tmp
 
+            
             sudo tee /etc/systemd/system/mywebapp.service > /dev/null << 'EOF'
             [Unit]
             Description=My .NET WebApp
@@ -75,15 +77,16 @@ jobs:
             Environment=DOTNET_CLI_HOME=/home/ubuntu
             Environment=TMPDIR=/home/ubuntu/tmp
 
-
             [Install]
             WantedBy=multi-user.target
             EOF
 
+            
             sudo systemctl daemon-reload
             sudo systemctl enable mywebapp
             sudo systemctl restart mywebapp
 
+            
             sudo rm -rf /var/www/html/*
             sudo cp -r /home/ubuntu/myapp/publish/wwwroot/* /var/www/html/
             sudo chown -R www-data:www-data /var/www/html
